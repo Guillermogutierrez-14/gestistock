@@ -1,13 +1,27 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>inicio</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button aria-label="Abrir menú"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Inicio</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">inicio</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <main>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title><h1>¡Hola, {{ auth.perfil()?.nombre }}!</h1></ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          Has iniciado sesión como
+          <ion-badge [color]="auth.esAdmin() ? 'success' : 'medium'">
+            {{ auth.esAdmin() ? 'Administrador' : 'Usuario estándar' }}
+          </ion-badge>
+        </p>
+        <p>Usa el menú para navegar por la aplicación.</p>
+      </ion-card-content>
+    </ion-card>
+  </main>
 </ion-content>

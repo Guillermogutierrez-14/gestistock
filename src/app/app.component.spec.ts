@@ -1,41 +1,57 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router, RouterLink } from '@angular/router';
 
 import { AppComponent } from './app.component';
+import { AuthService } from './core/services/auth.service';
+
+/** AuthService falso: así el test no se conecta a Supabase */
+function crearAuthFalso(esAdmin: boolean) {
+  return {
+    estaAutenticado: signal(true),
+    esAdmin: signal(esAdmin),
+    perfil: signal({ id: '1', nombre: 'Prueba', email: 'prueba@test.com', rol: esAdmin ? 'admin' : 'usuario' }),
+    logout: vi.fn(),
+  };
+}
+
+async function crearComponente(esAdmin: boolean) {
+  await TestBed.configureTestingModule({
+    imports: [AppComponent],
+    providers: [provideRouter([]), { provide: AuthService, useValue: crearAuthFalso(esAdmin) }],
+  }).compileComponents();
+  const fixture = TestBed.createComponent(AppComponent);
+  fixture.detectChanges();
+  await fixture.whenStable();
+  return fixture;
+}
+
+function rutasDelMenu(fixture: Awaited<ReturnType<typeof crearComponente>>): string[] {
+  const router = TestBed.inject(Router);
+  return fixture.debugElement
+    .queryAll(By.directive(RouterLink))
+    .map((el) => router.serializeUrl(el.injector.get(RouterLink).urlTree!));
+}
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [AppComponent],
-      providers: [provideRouter([])],
-    }).compileComponents();
-  });
-
-  it('debería crear la aplicación', () => {
-    const fixture = TestBed.createComponent(AppComponent);
+  it('debería crear la aplicación', async () => {
+    const fixture = await crearComponente(true);
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('debería mostrar las 5 opciones del menú', async () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    const labels = fixture.nativeElement.querySelectorAll('ion-label');
-    expect(labels.length).toEqual(5);
-    expect(labels[0].innerHTML).toContain('Inicio');
-    expect(labels[1].innerHTML).toContain('Productos');
+  it('el administrador ve las 5 opciones del menú', async () => {
+    const fixture = await crearComponente(true);
+    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/productos/nuevo', '/dashboard', '/ayuda']);
   });
 
-  it('debería tener las rutas correctas en el menú', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const router = TestBed.inject(Router);
-    const links = fixture.debugElement
-      .queryAll(By.directive(RouterLink))
-      .map((el) => el.injector.get(RouterLink));
-    expect(links.length).toEqual(5);
-    expect(router.serializeUrl(links[0].urlTree!)).toEqual('/inicio');
-    expect(router.serializeUrl(links[1].urlTree!)).toEqual('/productos');
+  it('el usuario estándar NO ve las opciones de administrador', async () => {
+    const fixture = await crearComponente(false);
+    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/ayuda']);
+  });
+
+  it('muestra la opción de cerrar sesión', async () => {
+    const fixture = await crearComponente(false);
+    expect(fixture.nativeElement.textContent).toContain('Cerrar sesión');
   });
 });
