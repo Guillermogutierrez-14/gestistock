@@ -7,12 +7,27 @@ import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonList, IonItem,
   IonLabel, IonBadge, IonNote, IonSelect, IonSelectOption, IonSegment, IonSegmentButton,
   IonInput, IonButton, IonSpinner, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  ToastController,
+  IonIcon, ToastController,
 } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { documentTextOutline, downloadOutline } from 'ionicons/icons';
+import { ExportacionService } from '../../core/services/exportacion.service';
+import { ColumnaTabla } from '../../shared/components/tabla-datos/tabla-datos.component';
 import { ProductoService } from '../../core/services/producto.service';
 import { MovimientoService } from '../../core/services/movimiento.service';
 import { Producto } from '../../core/models/producto.model';
 import { Movimiento, TipoMovimiento } from '../../core/models/movimiento.model';
+
+/** Fila del informe de movimientos */
+interface FilaInforme {
+  fecha: string;
+  tipo: string;
+  codigo: string;
+  producto: string;
+  cantidad: number;
+  usuario: string;
+  detalle: string;
+}
 
 /**
  * Página de movimientos de stock.
@@ -28,7 +43,7 @@ import { Movimiento, TipoMovimiento } from '../../core/models/movimiento.model';
     ReactiveFormsModule, DatePipe, IonContent, IonHeader, IonTitle, IonToolbar, IonButtons,
     IonMenuButton, IonList, IonItem, IonLabel, IonBadge, IonNote, IonSelect, IonSelectOption,
     IonSegment, IonSegmentButton, IonInput, IonButton, IonSpinner, IonText, IonCard, IonCardHeader,
-    IonCardTitle, IonCardContent,
+    IonCardTitle, IonCardContent, IonIcon,
   ],
 })
 export class MovimientosPage implements OnInit {
@@ -37,6 +52,7 @@ export class MovimientosPage implements OnInit {
   private readonly movimientoService = inject(MovimientoService);
   private readonly toastCtrl = inject(ToastController);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly exportacion = inject(ExportacionService);
 
   /** Estado */
   readonly productos = signal<Producto[]>([]);
@@ -53,6 +69,21 @@ export class MovimientosPage implements OnInit {
     cantidad: [1, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
     nota: ['', Validators.maxLength(120)],
   });
+
+  /** Columnas del informe de movimientos (los documentos JSON se "aplanan" a filas) */
+  private readonly columnasInforme: ColumnaTabla<FilaInforme>[] = [
+    { campo: 'fecha', titulo: 'Fecha' },
+    { campo: 'tipo', titulo: 'Tipo' },
+    { campo: 'codigo', titulo: 'Código' },
+    { campo: 'producto', titulo: 'Producto' },
+    { campo: 'cantidad', titulo: 'Cantidad', tipo: 'numero' },
+    { campo: 'usuario', titulo: 'Usuario' },
+    { campo: 'detalle', titulo: 'Nota / proveedor' },
+  ];
+
+  constructor() {
+    addIcons({ documentTextOutline, downloadOutline });
+  }
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -123,6 +154,37 @@ export class MovimientosPage implements OnInit {
     } finally {
       this.guardando.set(false);
     }
+  }
+
+  exportarCSV(): void {
+    this.exportacion.exportarCSV(this.nombreArchivo(), this.columnasInforme, this.filasInforme());
+  }
+
+  async exportarPDF(): Promise<void> {
+    const filas = this.filasInforme();
+    const unidades = (tipo: string) => filas.filter((f) => f.tipo === tipo).reduce((t, f) => t + f.cantidad, 0);
+    await this.exportacion.exportarPDF('Informe de movimientos de stock', this.nombreArchivo(), this.columnasInforme, filas, [
+      { etiqueta: 'Movimientos:', valor: String(filas.length) },
+      { etiqueta: 'Unidades que entran:', valor: String(unidades('Entrada')) },
+      { etiqueta: 'Unidades que salen:', valor: String(unidades('Salida')) },
+    ]);
+  }
+
+  /** Convierte cada documento JSON en una fila plana para el informe */
+  filasInforme(): FilaInforme[] {
+    return this.movimientos().map((m) => ({
+      fecha: new Date(m.creado_en).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }),
+      tipo: m.datos.tipo === 'entrada' ? 'Entrada' : 'Salida',
+      codigo: m.datos.producto_codigo,
+      producto: m.datos.producto_nombre,
+      cantidad: m.datos.cantidad,
+      usuario: m.usuario_email,
+      detalle: m.datos.nota ?? (m.datos.proveedor ? `Proveedor: ${m.datos.proveedor}` : ''),
+    }));
+  }
+
+  private nombreArchivo(): string {
+    return `gestistock-movimientos-${new Date().toISOString().slice(0, 10)}`;
   }
 
   /** Mantiene el stock mostrado en el desplegable al día cuando llega un movimiento */
