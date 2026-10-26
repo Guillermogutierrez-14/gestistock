@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { IonIcon } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { statsChartOutline } from 'ionicons/icons';
 
 /** Colores disponibles (los del tema de Ionic) */
 export type ColorWidget = 'primary' | 'success' | 'warning' | 'danger' | 'medium';
@@ -28,6 +30,11 @@ export class WidgetEstadisticaComponent {
 
   /** OUTPUT: avisa al padre de que se ha pulsado (envía el título) */
   readonly pulsado = output<string>();
+
+  constructor() {
+    // Registra el icono que se usa por defecto
+    addIcons({ statsChartOutline });
+  }
 
   pulsar(): void {
     this.pulsado.emit(this.titulo());

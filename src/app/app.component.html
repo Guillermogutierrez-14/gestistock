@@ -9,9 +9,7 @@
       <ion-content>
         <ion-list id="menu-list">
           <ion-list-header>GestiStock</ion-list-header>
-          <ion-note>
-            {{ auth.perfil()?.nombre }} · {{ auth.esAdmin() ? 'Administrador' : 'Usuario estándar' }}
-          </ion-note>
+          <ion-note>{{ auth.perfil()?.email }}</ion-note>
 
           @for (p of paginasVisibles(); track p.url) {
             <ion-menu-toggle auto-hide="false">

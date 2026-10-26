@@ -1,7 +1,18 @@
+/*
+ * Colores calculados a partir del fondo y el texto del tema (claro u oscuro),
+ * así el contraste siempre es correcto (WCAG).
+ */
+:host {
+  --fondo-cabecera: color-mix(in srgb, var(--ion-text-color, #000) 10%, var(--ion-background-color, #fff));
+  --fondo-hover: color-mix(in srgb, var(--ion-text-color, #000) 6%, var(--ion-background-color, #fff));
+  --borde: color-mix(in srgb, var(--ion-text-color, #000) 20%, var(--ion-background-color, #fff));
+  display: block;
+  color: var(--ion-text-color);
+}
+
 .resultados {
   margin: 0 8px 8px;
   font-size: 0.875rem;
-  color: var(--ion-color-step-600, #666);
 }
 
 /* En móvil, la tabla se desplaza en horizontal en vez de deformarse */
@@ -24,12 +35,13 @@ th,
 td {
   padding: 10px 8px;
   text-align: left;
-  border-bottom: 1px solid var(--ion-color-step-150, #ddd);
+  border-bottom: 1px solid var(--borde);
   white-space: nowrap;
 }
 
 th {
-  background: var(--ion-color-step-50, #f4f4f4);
+  background: var(--fondo-cabecera);
+  color: var(--ion-text-color);
 }
 
 .numero {
@@ -41,7 +53,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: var(--ion-color-step-100, #eee);
+  background: var(--fondo-hover);
 }
 
 /* Foco visible al navegar con el teclado (WCAG) */

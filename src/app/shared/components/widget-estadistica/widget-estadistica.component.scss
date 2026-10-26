@@ -17,15 +17,16 @@
   text-align: left;
   font: inherit;
   color: var(--ion-text-color);
-  background: var(--ion-color-step-50, #f4f4f4);
-  border: 1px solid var(--ion-color-step-150, #ddd);
+  /* Fondo calculado a partir del tema (claro u oscuro): el texto siempre contrasta */
+  background: color-mix(in srgb, var(--ion-text-color, #000) 6%, var(--ion-background-color, #fff));
+  border: 1px solid color-mix(in srgb, var(--ion-text-color, #000) 20%, var(--ion-background-color, #fff));
   border-left: 6px solid var(--color-widget);
   border-radius: 12px;
   cursor: pointer;
 }
 
 .widget:hover {
-  background: var(--ion-color-step-100, #eee);
+  background: color-mix(in srgb, var(--ion-text-color, #000) 12%, var(--ion-background-color, #fff));
 }
 
 .widget:focus-visible {
