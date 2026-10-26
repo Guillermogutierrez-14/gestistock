@@ -1,13 +1,71 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>dashboard</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button aria-label="Abrir menú"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Cuadro de mando</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">dashboard</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <main>
+    <h1 class="titulo-pagina">Cuadro de mando del inventario</h1>
+
+    @if (cargando()) {
+      <div class="centrado" role="status">
+        <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+        <p>Cargando datos...</p>
+      </div>
+    } @else if (error()) {
+      <ion-text color="danger"><p role="alert">{{ error() }}</p></ion-text>
+      <ion-button (click)="cargarDatos()">Reintentar</ion-button>
+    } @else {
+      <!-- FILTRO EN TIEMPO REAL -->
+      <ion-segment
+        class="filtro"
+        [scrollable]="true"
+        [value]="categoriaSeleccionada()"
+        (ionChange)="cambiarCategoria($event.detail.value)"
+        aria-label="Filtrar por categoría">
+        <ion-segment-button value="Todas"><ion-label>Todas</ion-label></ion-segment-button>
+        @for (categoria of categorias(); track categoria) {
+          <ion-segment-button [value]="categoria"><ion-label>{{ categoria }}</ion-label></ion-segment-button>
+        }
+      </ion-segment>
+
+      <!-- Widgets reutilizados -->
+      <section class="rejilla-widgets" aria-label="Indicadores principales">
+        <app-widget-estadistica titulo="Productos" [valor]="totalProductos()" icono="cube-outline" color="primary"></app-widget-estadistica>
+        <app-widget-estadistica titulo="Unidades en stock" [valor]="(totalUnidades() | number) ?? ''" icono="layers-outline" color="medium"></app-widget-estadistica>
+        <app-widget-estadistica titulo="Valor del inventario" [valor]="(valorInventario() | currency: 'EUR') ?? ''" icono="cash-outline" color="success"></app-widget-estadistica>
+        <app-widget-estadistica titulo="Stock bajo" [valor]="totalStockBajo()" icono="warning-outline" color="danger"></app-widget-estadistica>
+      </section>
+
+      <!-- Gráficos (componente reutilizable app-grafico) -->
+      <section class="rejilla-graficos" aria-label="Gráficos">
+        <app-grafico
+          tipo="doughnut"
+          titulo="Unidades por categoría (pulsa una porción para filtrar)"
+          descripcion="Gráfico circular con las unidades en stock de cada categoría"
+          [datos]="datosCategorias()"
+          (elementoPulsado)="onCategoriaPulsada($event)">
+        </app-grafico>
+
+        <app-grafico
+          tipo="line"
+          titulo="Entradas y salidas (últimos 7 días)"
+          descripcion="Gráfico de líneas con las unidades que entran y salen cada día"
+          [datos]="datosMovimientos()">
+        </app-grafico>
+
+        <app-grafico
+          class="ancho-completo"
+          tipo="bar"
+          titulo="Stock actual frente a stock mínimo"
+          descripcion="Gráfico de barras que compara el stock actual de cada producto con su mínimo"
+          [datos]="datosStock()">
+        </app-grafico>
+      </section>
+    }
+  </main>
 </ion-content>
