@@ -8,7 +8,7 @@ import { addIcons } from 'ionicons';
 import {
   homeOutline, homeSharp, cubeOutline, cubeSharp, addCircleOutline, addCircleSharp,
   statsChartOutline, statsChartSharp, helpCircleOutline, helpCircleSharp,
-  logOutOutline, logOutSharp,
+  logOutOutline, logOutSharp, swapHorizontalOutline, swapHorizontalSharp,
 } from 'ionicons/icons';
 import { AuthService } from './core/services/auth.service';
 
@@ -42,6 +42,7 @@ export class AppComponent {
   private readonly opciones: OpcionMenu[] = [
     { title: 'Inicio', url: '/inicio', icon: 'home', soloAdmin: false },
     { title: 'Productos', url: '/productos', icon: 'cube', soloAdmin: false },
+    { title: 'Movimientos', url: '/movimientos', icon: 'swap-horizontal', soloAdmin: false },
     { title: 'Nuevo producto', url: '/productos/nuevo', icon: 'add-circle', soloAdmin: true },
     { title: 'Cuadro de mando', url: '/dashboard', icon: 'stats-chart', soloAdmin: true },
     { title: 'Ayuda', url: '/ayuda', icon: 'help-circle', soloAdmin: false },
@@ -57,7 +58,7 @@ export class AppComponent {
     addIcons({
       homeOutline, homeSharp, cubeOutline, cubeSharp, addCircleOutline, addCircleSharp,
       statsChartOutline, statsChartSharp, helpCircleOutline, helpCircleSharp,
-      logOutOutline, logOutSharp,
+      logOutOutline, logOutSharp, swapHorizontalOutline, swapHorizontalSharp,
     });
   }
 

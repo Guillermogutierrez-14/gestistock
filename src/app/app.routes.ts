@@ -33,6 +33,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/productos/productos.page').then((m) => m.ProductosPage),
   },
   {
+    // Movimientos de stock en tiempo real (cualquier usuario con sesión)
+    path: 'movimientos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/movimientos/movimientos.page').then((m) => m.MovimientosPage),
+  },
+  {
     // Solo administradores pueden dar de alta productos
     path: 'productos/nuevo',
     canActivate: [adminGuard],

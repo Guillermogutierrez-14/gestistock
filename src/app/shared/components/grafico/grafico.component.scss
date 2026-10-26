@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.grafico {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--ion-text-color, #000) 20%, var(--ion-background-color, #fff));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ion-text-color, #000) 4%, var(--ion-background-color, #fff));
+}
+
+figcaption {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* Altura fija: el gráfico se adapta al ancho (responsive) sin deformarse */
+.lienzo {
+  position: relative;
+  height: 280px;
+}
