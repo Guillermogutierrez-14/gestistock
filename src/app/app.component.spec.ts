@@ -40,14 +40,14 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('el administrador ve las 5 opciones del menú', async () => {
+  it('el administrador ve las 6 opciones del menú', async () => {
     const fixture = await crearComponente(true);
-    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/productos/nuevo', '/dashboard', '/ayuda']);
+    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/movimientos', '/productos/nuevo', '/dashboard', '/ayuda']);
   });
 
   it('el usuario estándar NO ve las opciones de administrador', async () => {
     const fixture = await crearComponente(false);
-    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/ayuda']);
+    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/movimientos', '/ayuda']);
   });
 
   it('muestra la opción de cerrar sesión', async () => {

@@ -1,0 +1,72 @@
+.titulo-pagina {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+/* Mobile-First: formulario encima y lista debajo; en escritorio, uno al lado del otro */
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 992px) {
+  .rejilla {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+.formulario {
+  margin: 0;
+}
+
+.titulo-directo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.en-directo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ion-color-success);
+}
+
+.punto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ion-color-success);
+  animation: latido 1.5s infinite;
+}
+
+@keyframes latido {
+  50% { opacity: 0.3; }
+}
+
+/* Resalta el movimiento que acaba de llegar en directo */
+.nuevo {
+  --background: color-mix(in srgb, var(--ion-color-success) 15%, var(--ion-background-color, #fff));
+}
+
+.centrado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .punto { animation: none; }
+}

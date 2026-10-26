@@ -1,0 +1,110 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button aria-label="Abrir menú"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Movimientos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <main class="rejilla">
+    <h1 class="titulo-pagina">Movimientos de stock</h1>
+
+    <!-- Formulario para registrar una entrada o salida -->
+    <ion-card class="formulario">
+      <ion-card-header>
+        <ion-card-title><h2>Registrar movimiento</h2></ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="formulario" (ngSubmit)="registrar()" novalidate>
+          <ion-segment formControlName="tipo" aria-label="Tipo de movimiento">
+            <ion-segment-button value="entrada"><ion-label>Entrada</ion-label></ion-segment-button>
+            <ion-segment-button value="salida"><ion-label>Salida</ion-label></ion-segment-button>
+          </ion-segment>
+
+          <ion-select
+            class="ion-margin-top"
+            formControlName="productoId"
+            label="Producto"
+            labelPlacement="floating"
+            fill="outline"
+            interface="popover"
+            placeholder="Elige un producto">
+            @for (p of productos(); track p.id) {
+              <ion-select-option [value]="p.id">{{ p.codigo }} · {{ p.nombre }} ({{ p.stock }} uds.)</ion-select-option>
+            }
+          </ion-select>
+
+          <ion-input
+            class="ion-margin-top"
+            formControlName="cantidad"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            label="Cantidad"
+            labelPlacement="floating"
+            fill="outline"
+            errorText="Debe ser un número entero mayor que 0.">
+          </ion-input>
+
+          <ion-input
+            class="ion-margin-top"
+            formControlName="nota"
+            label="Nota (opcional)"
+            labelPlacement="floating"
+            fill="outline"
+            [counter]="true"
+            maxlength="120">
+          </ion-input>
+
+          <ion-button class="ion-margin-top" type="submit" expand="block" [disabled]="guardando() || cargando()">
+            @if (guardando()) {
+              <ion-spinner name="crescent" aria-label="Guardando"></ion-spinner>
+            } @else {
+              Registrar
+            }
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Lista en TIEMPO REAL -->
+    <section class="lista" aria-labelledby="titulo-directo">
+      <h2 id="titulo-directo" class="titulo-directo">
+        Últimos movimientos
+        <span class="en-directo"><span class="punto" aria-hidden="true"></span> En directo</span>
+      </h2>
+
+      @if (cargando()) {
+        <div class="centrado" role="status">
+          <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+          <p>Cargando movimientos...</p>
+        </div>
+      } @else if (error()) {
+        <ion-text color="danger"><p role="alert">{{ error() }}</p></ion-text>
+        <ion-button (click)="cargarDatos()">Reintentar</ion-button>
+      } @else {
+        <!-- aria-live: el lector de pantalla anuncia los movimientos que llegan en directo -->
+        <ion-list aria-live="polite">
+          @for (m of movimientos(); track m.id) {
+            <ion-item [class.nuevo]="m.id === ultimoEnDirecto()">
+              <ion-badge slot="start" [color]="m.datos.tipo === 'entrada' ? 'success' : 'danger'">
+                {{ m.datos.tipo === 'entrada' ? '+' : '−' }}{{ m.datos.cantidad }}
+              </ion-badge>
+              <ion-label>
+                <h3>{{ m.datos.producto_codigo }} · {{ m.datos.producto_nombre }}</h3>
+                <p>{{ m.datos.tipo === 'entrada' ? 'Entrada' : 'Salida' }} · {{ m.usuario_email }}</p>
+                @if (m.datos.nota) { <p>📝 {{ m.datos.nota }}</p> }
+                @if (m.datos.proveedor) { <p>🚚 Proveedor: {{ m.datos.proveedor }}</p> }
+              </ion-label>
+              <ion-note slot="end">{{ m.creado_en | date: 'dd/MM HH:mm' }}</ion-note>
+            </ion-item>
+          } @empty {
+            <ion-item><ion-label>Todavía no hay movimientos.</ion-label></ion-item>
+          }
+        </ion-list>
+      }
+    </section>
+  </main>
+</ion-content>
