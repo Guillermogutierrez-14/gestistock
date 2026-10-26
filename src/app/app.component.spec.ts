@@ -8,43 +8,34 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([])]
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
-  it('should create the app', () => {
+  it('debería crear la aplicación', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should have menu labels', async () => {
+  it('debería mostrar las 5 opciones del menú', async () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    // ion-label is a scoped Stencil component whose slot content is relocated
-    // asynchronously, so wait for hydration before reading textContent (ROU-10799).
     await fixture.whenStable();
-    const app = fixture.nativeElement;
-    const menuItems = app.querySelectorAll('ion-label');
-    expect(menuItems.length).toEqual(12);
-    expect(menuItems[0].innerHTML).toContain('Inbox');
-    expect(menuItems[1].innerHTML).toContain('Outbox');
+    const labels = fixture.nativeElement.querySelectorAll('ion-label');
+    expect(labels.length).toEqual(5);
+    expect(labels[0].innerHTML).toContain('Inicio');
+    expect(labels[1].innerHTML).toContain('Productos');
   });
 
-  it('should have urls', () => {
+  it('debería tener las rutas correctas en el menú', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    const app = fixture.nativeElement;
-    expect(app.querySelectorAll('ion-item').length).toEqual(12);
-    // Ionic applies the rendered href through its own async write queue, so
-    // reading the DOM attribute is flaky (FW-6264). Assert the routerLink
-    // binding directly, which resolves synchronously.
     const router = TestBed.inject(Router);
     const links = fixture.debugElement
       .queryAll(By.directive(RouterLink))
       .map((el) => el.injector.get(RouterLink));
-    expect(links.length).toEqual(6);
-    expect(router.serializeUrl(links[0].urlTree!)).toEqual('/folder/Inbox');
-    expect(router.serializeUrl(links[1].urlTree!)).toEqual('/folder/Outbox');
+    expect(links.length).toEqual(5);
+    expect(router.serializeUrl(links[0].urlTree!)).toEqual('/inicio');
+    expect(router.serializeUrl(links[1].urlTree!)).toEqual('/productos');
   });
 });
