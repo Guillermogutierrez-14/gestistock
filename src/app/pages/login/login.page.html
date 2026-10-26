@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>GestiStock</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <main class="contenedor-login">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title><h1>Iniciar sesión</h1></ion-card-title>
+        <ion-card-subtitle>Sistema de gestión de inventario</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- formGroup enlaza el formulario HTML con el FormGroup del .ts -->
+        <form [formGroup]="formulario" (ngSubmit)="iniciarSesion()" novalidate>
+          <ion-input
+            formControlName="email"
+            type="email"
+            label="Email"
+            labelPlacement="floating"
+            fill="outline"
+            autocomplete="email"
+            inputmode="email"
+            errorText="Introduce un email válido.">
+          </ion-input>
+
+          <ion-input
+            class="ion-margin-top"
+            formControlName="password"
+            type="password"
+            label="Contraseña"
+            labelPlacement="floating"
+            fill="outline"
+            autocomplete="current-password"
+            errorText="La contraseña debe tener al menos 6 caracteres.">
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
+
+          @if (mensajeError()) {
+            <ion-text color="danger">
+              <p role="alert">{{ mensajeError() }}</p>
+            </ion-text>
+          }
+
+          <ion-button class="ion-margin-top" type="submit" expand="block" [disabled]="cargando()">
+            @if (cargando()) {
+              <ion-spinner name="crescent" aria-label="Iniciando sesión"></ion-spinner>
+            } @else {
+              Entrar
+            }
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </main>
+</ion-content>

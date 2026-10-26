@@ -1,0 +1,10 @@
+/* Tarjeta de login centrada y con ancho máximo (Mobile-First: en móvil ocupa todo el ancho) */
+.contenedor-login {
+  max-width: 420px;
+  margin: 8vh auto 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}

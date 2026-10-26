@@ -1,27 +1,69 @@
-
-import { Component } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink } from '@ionic/angular';
+import {
+  IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote,
+  IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterOutlet, IonRouterLink,
+} from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, heartOutline, heartSharp, archiveOutline, archiveSharp, trashOutline, trashSharp, warningOutline, warningSharp, bookmarkOutline, bookmarkSharp } from 'ionicons/icons';
+import {
+  homeOutline, homeSharp, cubeOutline, cubeSharp, addCircleOutline, addCircleSharp,
+  statsChartOutline, statsChartSharp, helpCircleOutline, helpCircleSharp,
+  logOutOutline, logOutSharp, swapHorizontalOutline, swapHorizontalSharp,
+} from 'ionicons/icons';
+import { AuthService } from './core/services/auth.service';
 
+/** Opción del menú lateral */
+interface OpcionMenu {
+  title: string;
+  url: string;
+  icon: string;
+  /** Si es true, solo la ve el administrador */
+  soloAdmin: boolean;
+}
+
+/**
+ * Componente raíz de la aplicación.
+ * Contiene el menú lateral (Side Menu), que muestra unas opciones u otras
+ * según el rol del usuario, y el router-outlet donde se cargan las páginas.
+ */
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
-  imports: [RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList, IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet],
+  imports: [
+    RouterLink, RouterLinkActive, IonApp, IonSplitPane, IonMenu, IonContent, IonList,
+    IonListHeader, IonNote, IonMenuToggle, IonItem, IonIcon, IonLabel, IonRouterLink, IonRouterOutlet,
+  ],
 })
 export class AppComponent {
-  protected readonly appPages = [
-    { title: 'Inbox', url: '/folder/Inbox', icon: 'mail' },
-    { title: 'Outbox', url: '/folder/Outbox', icon: 'paper-plane' },
-    { title: 'Favorites', url: '/folder/Favorites', icon: 'heart' },
-    { title: 'Archived', url: '/folder/Archived', icon: 'archive' },
-    { title: 'Trash', url: '/folder/Trash', icon: 'trash' },
-    { title: 'Spam', url: '/folder/Spam', icon: 'warning' },
+  protected readonly auth = inject(AuthService);
+
+  /** Todas las opciones del menú */
+  private readonly opciones: OpcionMenu[] = [
+    { title: 'Inicio', url: '/inicio', icon: 'home', soloAdmin: false },
+    { title: 'Productos', url: '/productos', icon: 'cube', soloAdmin: false },
+    { title: 'Movimientos', url: '/movimientos', icon: 'swap-horizontal', soloAdmin: false },
+    { title: 'Nuevo producto', url: '/productos/nuevo', icon: 'add-circle', soloAdmin: true },
+    { title: 'Cuadro de mando', url: '/dashboard', icon: 'stats-chart', soloAdmin: true },
+    { title: 'Ayuda', url: '/ayuda', icon: 'help-circle', soloAdmin: false },
   ];
-  protected readonly labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
+
+  /** Opciones visibles: se recalculan solas cuando cambia el rol (Signal computed) */
+  protected readonly paginasVisibles = computed(() =>
+    this.opciones.filter((opcion) => !opcion.soloAdmin || this.auth.esAdmin()),
+  );
+
   constructor() {
-    addIcons({ mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, heartOutline, heartSharp, archiveOutline, archiveSharp, trashOutline, trashSharp, warningOutline, warningSharp, bookmarkOutline, bookmarkSharp });
+    // Registramos solo los iconos que usamos (optimiza el tamaño final)
+    addIcons({
+      homeOutline, homeSharp, cubeOutline, cubeSharp, addCircleOutline, addCircleSharp,
+      statsChartOutline, statsChartSharp, helpCircleOutline, helpCircleSharp,
+      logOutOutline, logOutSharp, swapHorizontalOutline, swapHorizontalSharp,
+    });
+  }
+
+  /** Cierra la sesión del usuario */
+  protected cerrarSesion(): void {
+    void this.auth.logout();
   }
 }

@@ -1,0 +1,25 @@
+.titulo-pagina {
+  margin-top: 0;
+  font-size: 1.5rem;
+}
+
+.centrado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+}
+
+/* Mobile-First: 1 columna en móvil, 3 columnas a partir de tablet */
+.rejilla-widgets {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .rejilla-widgets {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

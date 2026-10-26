@@ -1,0 +1,8 @@
+<figure class="grafico">
+  @if (titulo()) {
+    <figcaption>{{ titulo() }}</figcaption>
+  }
+  <div class="lienzo">
+    <canvas #lienzo role="img" [attr.aria-label]="descripcion() || titulo()"></canvas>
+  </div>
+</figure>

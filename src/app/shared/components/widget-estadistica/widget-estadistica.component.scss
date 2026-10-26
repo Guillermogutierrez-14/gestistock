@@ -1,0 +1,67 @@
+:host {
+  display: block;
+}
+
+.widget {
+  --color-widget: var(--ion-color-primary);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'icono valor'
+    'icono titulo'
+    'icono descripcion';
+  column-gap: 16px;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  font: inherit;
+  color: var(--ion-text-color);
+  /* Fondo calculado a partir del tema (claro u oscuro): el texto siempre contrasta */
+  background: color-mix(in srgb, var(--ion-text-color, #000) 6%, var(--ion-background-color, #fff));
+  border: 1px solid color-mix(in srgb, var(--ion-text-color, #000) 20%, var(--ion-background-color, #fff));
+  border-left: 6px solid var(--color-widget);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.widget:hover {
+  background: color-mix(in srgb, var(--ion-text-color, #000) 12%, var(--ion-background-color, #fff));
+}
+
+.widget:focus-visible {
+  outline: 3px solid var(--color-widget);
+  outline-offset: 2px;
+}
+
+.activo {
+  box-shadow: 0 0 0 2px var(--color-widget);
+}
+
+.color-primary { --color-widget: var(--ion-color-primary); }
+.color-success { --color-widget: var(--ion-color-success); }
+.color-warning { --color-widget: var(--ion-color-warning); }
+.color-danger  { --color-widget: var(--ion-color-danger); }
+.color-medium  { --color-widget: var(--ion-color-medium); }
+
+.icono {
+  grid-area: icono;
+  font-size: 2.5rem;
+  color: var(--color-widget);
+}
+
+.valor {
+  grid-area: valor;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.titulo {
+  grid-area: titulo;
+  font-weight: 600;
+}
+
+.descripcion {
+  grid-area: descripcion;
+  font-size: 0.875rem;
+}

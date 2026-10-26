@@ -1,0 +1,49 @@
+<section class="tabla-datos" [attr.aria-label]="titulo()">
+  <ion-searchbar
+    [placeholder]="placeholderBusqueda()"
+    [attr.aria-label]="placeholderBusqueda()"
+    [debounce]="250"
+    (ionInput)="onBuscar($event)">
+  </ion-searchbar>
+
+  <!-- aria-live: el lector de pantalla anuncia el número de resultados al buscar -->
+  <p class="resultados" aria-live="polite">
+    {{ datosFiltrados().length }} de {{ datos().length }} registros
+  </p>
+
+  <div class="contenedor-scroll">
+    <table>
+      <caption>{{ titulo() }}</caption>
+      <thead>
+        <tr>
+          @for (columna of columnas(); track columna.campo) {
+            <th scope="col" [class.numero]="esNumerica(columna)">{{ columna.titulo }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of datosFiltrados(); track fila) {
+          <tr
+            tabindex="0"
+            (click)="seleccionar(fila)"
+            (keydown.enter)="seleccionar(fila)"
+            (keydown.space)="seleccionar(fila); $event.preventDefault()">
+            @for (columna of columnas(); track columna.campo) {
+              <td [class.numero]="esNumerica(columna)">
+                @switch (columna.tipo) {
+                  @case ('moneda') { {{ $any(valor(fila, columna)) | currency: 'EUR' }} }
+                  @case ('numero') { {{ $any(valor(fila, columna)) | number }} }
+                  @default { {{ valor(fila, columna) }} }
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td class="vacio" [attr.colspan]="columnas().length">No hay resultados</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

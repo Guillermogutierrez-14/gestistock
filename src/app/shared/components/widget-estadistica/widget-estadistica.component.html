@@ -1,0 +1,15 @@
+<!-- Es un <button> real: se puede usar con teclado (Tab + Enter) y el lector de pantalla lo anuncia -->
+<button
+  type="button"
+  class="widget"
+  [class]="'color-' + color()"
+  [class.activo]="activo()"
+  [attr.aria-pressed]="activo()"
+  (click)="pulsar()">
+  <ion-icon class="icono" [name]="icono()" aria-hidden="true"></ion-icon>
+  <span class="valor">{{ valor() }}</span>
+  <span class="titulo">{{ titulo() }}</span>
+  @if (descripcion()) {
+    <span class="descripcion">{{ descripcion() }}</span>
+  }
+</button>

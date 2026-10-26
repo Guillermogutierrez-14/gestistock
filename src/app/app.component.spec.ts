@@ -1,50 +1,57 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router, RouterLink } from '@angular/router';
 
 import { AppComponent } from './app.component';
+import { AuthService } from './core/services/auth.service';
+
+/** AuthService falso: así el test no se conecta a Supabase */
+function crearAuthFalso(esAdmin: boolean) {
+  return {
+    estaAutenticado: signal(true),
+    esAdmin: signal(esAdmin),
+    perfil: signal({ id: '1', nombre: 'Prueba', email: 'prueba@test.com', rol: esAdmin ? 'admin' : 'usuario' }),
+    logout: vi.fn(),
+  };
+}
+
+async function crearComponente(esAdmin: boolean) {
+  await TestBed.configureTestingModule({
+    imports: [AppComponent],
+    providers: [provideRouter([]), { provide: AuthService, useValue: crearAuthFalso(esAdmin) }],
+  }).compileComponents();
+  const fixture = TestBed.createComponent(AppComponent);
+  fixture.detectChanges();
+  await fixture.whenStable();
+  return fixture;
+}
+
+function rutasDelMenu(fixture: Awaited<ReturnType<typeof crearComponente>>): string[] {
+  const router = TestBed.inject(Router);
+  return fixture.debugElement
+    .queryAll(By.directive(RouterLink))
+    .map((el) => router.serializeUrl(el.injector.get(RouterLink).urlTree!));
+}
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [AppComponent],
-      providers: [provideRouter([])]
-    }).compileComponents();
+  it('debería crear la aplicación', async () => {
+    const fixture = await crearComponente(true);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  it('el administrador ve las 6 opciones del menú', async () => {
+    const fixture = await crearComponente(true);
+    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/movimientos', '/productos/nuevo', '/dashboard', '/ayuda']);
   });
 
-  it('should have menu labels', async () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    // ion-label is a scoped Stencil component whose slot content is relocated
-    // asynchronously, so wait for hydration before reading textContent (ROU-10799).
-    await fixture.whenStable();
-    const app = fixture.nativeElement;
-    const menuItems = app.querySelectorAll('ion-label');
-    expect(menuItems.length).toEqual(12);
-    expect(menuItems[0].innerHTML).toContain('Inbox');
-    expect(menuItems[1].innerHTML).toContain('Outbox');
+  it('el usuario estándar NO ve las opciones de administrador', async () => {
+    const fixture = await crearComponente(false);
+    expect(rutasDelMenu(fixture)).toEqual(['/inicio', '/productos', '/movimientos', '/ayuda']);
   });
 
-  it('should have urls', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const app = fixture.nativeElement;
-    expect(app.querySelectorAll('ion-item').length).toEqual(12);
-    // Ionic applies the rendered href through its own async write queue, so
-    // reading the DOM attribute is flaky (FW-6264). Assert the routerLink
-    // binding directly, which resolves synchronously.
-    const router = TestBed.inject(Router);
-    const links = fixture.debugElement
-      .queryAll(By.directive(RouterLink))
-      .map((el) => el.injector.get(RouterLink));
-    expect(links.length).toEqual(6);
-    expect(router.serializeUrl(links[0].urlTree!)).toEqual('/folder/Inbox');
-    expect(router.serializeUrl(links[1].urlTree!)).toEqual('/folder/Outbox');
+  it('muestra la opción de cerrar sesión', async () => {
+    const fixture = await crearComponente(false);
+    expect(fixture.nativeElement.textContent).toContain('Cerrar sesión');
   });
 });
