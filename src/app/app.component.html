@@ -1,12 +1,19 @@
 <ion-app>
   <ion-split-pane contentId="main-content">
-    <ion-menu contentId="main-content" type="overlay" aria-label="Menú principal">
+    <!-- El menú solo está activo si hay un usuario con sesión iniciada -->
+    <ion-menu
+      contentId="main-content"
+      type="overlay"
+      [disabled]="!auth.estaAutenticado()"
+      aria-label="Menú principal">
       <ion-content>
         <ion-list id="menu-list">
           <ion-list-header>GestiStock</ion-list-header>
-          <ion-note>Gestión de inventario</ion-note>
+          <ion-note>
+            {{ auth.perfil()?.nombre }} · {{ auth.esAdmin() ? 'Administrador' : 'Usuario estándar' }}
+          </ion-note>
 
-          @for (p of appPages; track p.url) {
+          @for (p of paginasVisibles(); track p.url) {
             <ion-menu-toggle auto-hide="false">
               <ion-item
                 routerDirection="root"
@@ -19,6 +26,13 @@
               </ion-item>
             </ion-menu-toggle>
           }
+
+          <ion-menu-toggle auto-hide="false">
+            <ion-item button lines="none" detail="false" (click)="cerrarSesion()">
+              <ion-icon aria-hidden="true" slot="start" ios="log-out-outline" md="log-out-sharp"></ion-icon>
+              <ion-label>Cerrar sesión</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
         </ion-list>
       </ion-content>
     </ion-menu>

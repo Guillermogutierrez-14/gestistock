@@ -68,3 +68,9 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+#Variables de entorno (claves de Supabase) - NO se suben a Git
+.env
+src/environments/env.generated.ts
+#System files
+.DS_Store
+Thumbs.db
