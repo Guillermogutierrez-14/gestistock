@@ -1,0 +1,7 @@
+{
+  "name": "gestistock",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
