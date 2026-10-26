@@ -4,6 +4,17 @@
       <ion-menu-button aria-label="Abrir menú"></ion-menu-button>
     </ion-buttons>
     <ion-title>Productos</ion-title>
+    <!-- Exportación de informes (lo que se ve en la tabla) -->
+    <ion-buttons slot="end">
+      <ion-button (click)="exportarCSV()" [disabled]="cargando() || !!error()">
+        <ion-icon slot="start" name="document-text-outline" aria-hidden="true"></ion-icon>
+        Exportar CSV
+      </ion-button>
+      <ion-button (click)="exportarPDF()" [disabled]="cargando() || !!error()">
+        <ion-icon slot="start" name="download-outline" aria-hidden="true"></ion-icon>
+        Exportar PDF
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -59,7 +70,8 @@
         [columnas]="columnas"
         [titulo]="soloStockBajo() ? 'Productos con stock bajo' : 'Listado de productos'"
         placeholderBusqueda="Buscar por código, nombre o categoría"
-        (filaSeleccionada)="mostrarDetalle($event)">
+        (filaSeleccionada)="mostrarDetalle($event)"
+        (busquedaCambiada)="busqueda.set($event)">
       </app-tabla-datos>
     }
   </main>

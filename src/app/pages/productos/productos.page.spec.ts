@@ -36,4 +36,9 @@ describe('ProductosPage', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('app-tabla-datos tbody tr').length).toBe(1);
   });
+
+  it('exporta solo los productos que coinciden con la búsqueda', () => {
+    fixture.componentInstance.busqueda.set('dos');
+    expect(fixture.componentInstance.productosExportables().map((p) => p.codigo)).toEqual(['A-2']);
+  });
 });

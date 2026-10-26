@@ -66,4 +66,11 @@ describe('MovimientosPage', () => {
       tipo: 'entrada', producto_id: 1, producto_codigo: 'A-1', producto_nombre: 'Uno', cantidad: 5, nota: 'Prueba',
     });
   });
+
+  it('aplana los documentos JSON a filas para el informe', () => {
+    const fila = pagina.filasInforme()[0];
+    expect(fila.tipo).toBe('Salida');
+    expect(fila.codigo).toBe('A-1');
+    expect(fila.cantidad).toBe(2);
+  });
 });

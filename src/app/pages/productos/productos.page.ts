@@ -3,11 +3,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonMenuButton,
-  IonSpinner, IonText, IonButton, ToastController,
+  IonSpinner, IonText, IonButton, IonIcon, ToastController,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { cubeOutline, warningOutline, cashOutline } from 'ionicons/icons';
+import { cubeOutline, warningOutline, cashOutline, documentTextOutline, downloadOutline } from 'ionicons/icons';
 import { ProductoService } from '../../core/services/producto.service';
+import { ExportacionService } from '../../core/services/exportacion.service';
 import { Producto } from '../../core/models/producto.model';
 import { ColumnaTabla, TablaDatosComponent } from '../../shared/components/tabla-datos/tabla-datos.component';
 import { WidgetEstadisticaComponent } from '../../shared/components/widget-estadistica/widget-estadistica.component';
@@ -23,12 +24,13 @@ import { WidgetEstadisticaComponent } from '../../shared/components/widget-estad
   styleUrls: ['./productos.page.scss'],
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonSpinner, IonText,
-    IonButton, CurrencyPipe, TablaDatosComponent, WidgetEstadisticaComponent,
+    IonButton, IonIcon, CurrencyPipe, TablaDatosComponent, WidgetEstadisticaComponent,
   ],
 })
 export class ProductosPage implements OnInit {
   private readonly productoService = inject(ProductoService);
   private readonly toastCtrl = inject(ToastController);
+  private readonly exportacion = inject(ExportacionService);
   private readonly destroyRef = inject(DestroyRef);
 
   /** Estado de la página */
@@ -36,6 +38,8 @@ export class ProductosPage implements OnInit {
   protected readonly cargando = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly soloStockBajo = signal(false);
+  /** Texto del buscador (lo recibimos con el output `busquedaCambiada` de la tabla) */
+  readonly busqueda = signal('');
 
   /** Columnas que se pasan a la tabla reutilizable */
   protected readonly columnas: ColumnaTabla<Producto>[] = [
@@ -50,6 +54,15 @@ export class ProductosPage implements OnInit {
   protected readonly productosVisibles = computed(() =>
     this.soloStockBajo() ? this.productos().filter((p) => this.tieneStockBajo(p)) : this.productos(),
   );
+  /** Lo que se exporta = lo que el usuario ve (filtro de stock bajo + texto del buscador) */
+  readonly productosExportables = computed(() => {
+    const texto = this.busqueda().trim().toLowerCase();
+    if (!texto) return this.productosVisibles();
+    return this.productosVisibles().filter((p) =>
+      [p.codigo, p.nombre, p.categoria].some((valor) => valor.toLowerCase().includes(texto)),
+    );
+  });
+
   protected readonly totalProductos = computed(() => this.productos().length);
   protected readonly totalStockBajo = computed(() => this.productos().filter((p) => this.tieneStockBajo(p)).length);
   protected readonly valorInventario = computed(() =>
@@ -57,7 +70,7 @@ export class ProductosPage implements OnInit {
   );
 
   constructor() {
-    addIcons({ cubeOutline, warningOutline, cashOutline });
+    addIcons({ cubeOutline, warningOutline, cashOutline, documentTextOutline, downloadOutline });
   }
 
   /** Ciclo de vida: al iniciar el componente, cargamos los datos */
@@ -98,6 +111,33 @@ export class ProductosPage implements OnInit {
       position: 'bottom',
     });
     await toast.present();
+  }
+
+  /** Descarga el listado visible en CSV */
+  exportarCSV(): void {
+    this.exportacion.exportarCSV(this.nombreArchivo(), this.columnas, this.productosExportables());
+  }
+
+  /** Descarga el listado visible en PDF, con un resumen arriba */
+  async exportarPDF(): Promise<void> {
+    const lista = this.productosExportables();
+    const valor = lista.reduce((t, p) => t + p.precio * p.stock, 0);
+    await this.exportacion.exportarPDF(
+      this.soloStockBajo() ? 'Informe de productos con stock bajo' : 'Informe de inventario de productos',
+      this.nombreArchivo(),
+      this.columnas,
+      lista,
+      [
+        { etiqueta: 'Productos:', valor: String(lista.length) },
+        { etiqueta: 'Unidades en stock:', valor: lista.reduce((t, p) => t + p.stock, 0).toLocaleString('es-ES') },
+        { etiqueta: 'Valor del inventario:', valor: `${valor.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €` },
+        { etiqueta: 'Con stock bajo:', valor: String(lista.filter((p) => this.tieneStockBajo(p)).length) },
+      ],
+    );
+  }
+
+  private nombreArchivo(): string {
+    return `gestistock-productos-${new Date().toISOString().slice(0, 10)}`;
   }
 
   private tieneStockBajo(producto: Producto): boolean {
