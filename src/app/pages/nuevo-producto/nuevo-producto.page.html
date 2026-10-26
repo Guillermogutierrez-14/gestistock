@@ -1,13 +1,118 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>nuevo-producto</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button aria-label="Abrir menú"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Nuevo producto</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">nuevo-producto</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <main class="contenedor">
+    <h1 class="titulo-pagina">Alta de producto</h1>
+
+    <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <div class="rejilla">
+        <!-- Validación síncrona (formato) + ASÍNCRONA (¿existe ya en la BD?) -->
+        <ion-input
+          formControlName="codigo"
+          label="Código"
+          labelPlacement="floating"
+          fill="outline"
+          placeholder="INF-006"
+          [helperText]="comprobandoCodigo ? 'Comprobando disponibilidad…' : 'Formato: ABC-123'"
+          [errorText]="mensaje('codigo')"
+          (ionInput)="aMayusculas()">
+          @if (comprobandoCodigo) {
+            <ion-spinner slot="end" name="dots" aria-label="Comprobando código"></ion-spinner>
+          }
+        </ion-input>
+
+        <ion-input
+          formControlName="nombre"
+          label="Nombre"
+          labelPlacement="floating"
+          fill="outline"
+          [counter]="true"
+          maxlength="80"
+          [errorText]="mensaje('nombre')">
+        </ion-input>
+
+        <ion-select
+          formControlName="categoria"
+          label="Categoría"
+          labelPlacement="floating"
+          fill="outline"
+          interface="popover"
+          placeholder="Elige una categoría">
+          @for (categoria of categorias; track categoria) {
+            <ion-select-option [value]="categoria">{{ categoria }}</ion-select-option>
+          }
+        </ion-select>
+
+        <ion-input
+          formControlName="precio"
+          type="number"
+          inputmode="decimal"
+          min="0"
+          step="0.01"
+          label="Precio (€)"
+          labelPlacement="floating"
+          fill="outline"
+          [errorText]="mensaje('precio')">
+        </ion-input>
+
+        <ion-input
+          formControlName="stock"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          label="Stock actual"
+          labelPlacement="floating"
+          fill="outline"
+          [errorText]="mensaje('stock')">
+        </ion-input>
+
+        <ion-input
+          formControlName="stock_minimo"
+          type="number"
+          inputmode="numeric"
+          min="0"
+          label="Stock mínimo"
+          labelPlacement="floating"
+          fill="outline"
+          [errorText]="mensaje('stock_minimo')">
+        </ion-input>
+      </div>
+
+      @if (formulario.controls.categoria.touched && formulario.controls.categoria.invalid) {
+        <ion-text color="danger"><p class="error-select">Elige una categoría.</p></ion-text>
+      }
+
+      <!-- Binding UNIDIRECCIONAL: la vista previa se actualiza sola al escribir -->
+      <ion-card class="vista-previa">
+        <ion-card-content>
+          <p>Valor total en inventario de este producto:</p>
+          <p class="importe" aria-live="polite">{{ valorTotal() | currency: 'EUR' }}</p>
+        </ion-card-content>
+      </ion-card>
+
+      @if (mensajeError()) {
+        <ion-text color="danger"><p role="alert">{{ mensajeError() }}</p></ion-text>
+      }
+
+      <ion-button type="submit" expand="block" [disabled]="guardando()">
+        @if (guardando()) {
+          <ion-spinner name="crescent" aria-label="Guardando"></ion-spinner>
+        } @else {
+          Guardar producto
+        }
+      </ion-button>
+    </form>
+
+    <!-- Binding BIDIRECCIONAL con [(ngModel)]: el valor va de la vista al .ts y del .ts a la vista -->
+    <ion-toggle class="ion-margin-top" [(ngModel)]="seguirAnadiendo" labelPlacement="end">
+      Seguir añadiendo productos después de guardar
+    </ion-toggle>
+  </main>
 </ion-content>
