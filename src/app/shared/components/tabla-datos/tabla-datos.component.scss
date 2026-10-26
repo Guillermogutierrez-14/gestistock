@@ -1,0 +1,56 @@
+.resultados {
+  margin: 0 8px 8px;
+  font-size: 0.875rem;
+  color: var(--ion-color-step-600, #666);
+}
+
+/* En móvil, la tabla se desplaza en horizontal en vez de deformarse */
+.contenedor-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 8px;
+}
+
+th,
+td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--ion-color-step-150, #ddd);
+  white-space: nowrap;
+}
+
+th {
+  background: var(--ion-color-step-50, #f4f4f4);
+}
+
+.numero {
+  text-align: right;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: var(--ion-color-step-100, #eee);
+}
+
+/* Foco visible al navegar con el teclado (WCAG) */
+tbody tr:focus-visible {
+  outline: 3px solid var(--ion-color-primary);
+  outline-offset: -3px;
+}
+
+.vacio {
+  text-align: center;
+  font-style: italic;
+}

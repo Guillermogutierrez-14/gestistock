@@ -1,13 +1,66 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>productos</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button aria-label="Abrir menú"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Productos</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">productos</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <main>
+    <h1 class="titulo-pagina">Inventario de productos</h1>
+
+    @if (cargando()) {
+      <div class="centrado" role="status">
+        <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+        <p>Cargando productos...</p>
+      </div>
+    } @else if (error()) {
+      <ion-text color="danger">
+        <p role="alert">{{ error() }}</p>
+      </ion-text>
+      <ion-button (click)="cargar()">Reintentar</ion-button>
+    } @else {
+      <!-- Componente reutilizable 1: widgets de estadística (inputs + output "pulsado") -->
+      <section class="rejilla-widgets" aria-label="Resumen del inventario">
+        <app-widget-estadistica
+          titulo="Productos"
+          [valor]="totalProductos()"
+          icono="cube-outline"
+          color="primary"
+          descripcion="Referencias en catálogo"
+          (pulsado)="onWidgetPulsado($event)">
+        </app-widget-estadistica>
+
+        <app-widget-estadistica
+          titulo="Stock bajo"
+          [valor]="totalStockBajo()"
+          icono="warning-outline"
+          color="danger"
+          [activo]="soloStockBajo()"
+          [descripcion]="soloStockBajo() ? 'Pulsa para ver todos' : 'Pulsa para filtrar'"
+          (pulsado)="onWidgetPulsado($event)">
+        </app-widget-estadistica>
+
+        <app-widget-estadistica
+          titulo="Valor del inventario"
+          [valor]="(valorInventario() | currency: 'EUR') ?? ''"
+          icono="cash-outline"
+          color="success"
+          descripcion="Precio × stock"
+          (pulsado)="onWidgetPulsado($event)">
+        </app-widget-estadistica>
+      </section>
+
+      <!-- Componente reutilizable 2: tabla con buscador (inputs + outputs) -->
+      <app-tabla-datos
+        [datos]="productosVisibles()"
+        [columnas]="columnas"
+        [titulo]="soloStockBajo() ? 'Productos con stock bajo' : 'Listado de productos'"
+        placeholderBusqueda="Buscar por código, nombre o categoría"
+        (filaSeleccionada)="mostrarDetalle($event)">
+      </app-tabla-datos>
+    }
+  </main>
 </ion-content>

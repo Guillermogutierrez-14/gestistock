@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+.widget {
+  --color-widget: var(--ion-color-primary);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'icono valor'
+    'icono titulo'
+    'icono descripcion';
+  column-gap: 16px;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  font: inherit;
+  color: var(--ion-text-color);
+  background: var(--ion-color-step-50, #f4f4f4);
+  border: 1px solid var(--ion-color-step-150, #ddd);
+  border-left: 6px solid var(--color-widget);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.widget:hover {
+  background: var(--ion-color-step-100, #eee);
+}
+
+.widget:focus-visible {
+  outline: 3px solid var(--color-widget);
+  outline-offset: 2px;
+}
+
+.activo {
+  box-shadow: 0 0 0 2px var(--color-widget);
+}
+
+.color-primary { --color-widget: var(--ion-color-primary); }
+.color-success { --color-widget: var(--ion-color-success); }
+.color-warning { --color-widget: var(--ion-color-warning); }
+.color-danger  { --color-widget: var(--ion-color-danger); }
+.color-medium  { --color-widget: var(--ion-color-medium); }
+
+.icono {
+  grid-area: icono;
+  font-size: 2.5rem;
+  color: var(--color-widget);
+}
+
+.valor {
+  grid-area: valor;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.titulo {
+  grid-area: titulo;
+  font-weight: 600;
+}
+
+.descripcion {
+  grid-area: descripcion;
+  font-size: 0.875rem;
+}
