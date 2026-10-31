@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonMenuButton,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonBadge,
@@ -17,4 +17,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class InicioPage {
   protected readonly auth = inject(AuthService);
+
+  /** Query param `?acceso=denegado` que pone rolGuard (llega como input gracias a withComponentInputBinding) */
+  readonly acceso = input<string>();
 }

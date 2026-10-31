@@ -1,13 +1,41 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>ayuda</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button aria-label="Abrir menú"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Ayuda</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">ayuda</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <main class="contenedor-ayuda">
+    <h1>Manual de usuario</h1>
+    <p>
+      GestiStock es una aplicación para gestionar el inventario de la empresa.
+      Pulsa cada apartado para ver cómo se usa.
+    </p>
+
+    <ion-accordion-group>
+      @for (seccion of seccionesVisibles; track seccion.titulo) {
+        <ion-accordion [value]="seccion.titulo">
+          <ion-item slot="header">
+            <ion-label><h2>{{ seccion.titulo }}</h2></ion-label>
+          </ion-item>
+          <div class="ion-padding" slot="content">
+            <ol>
+              @for (paso of seccion.pasos; track paso) {
+                <li>{{ paso }}</li>
+              }
+            </ol>
+          </div>
+        </ion-accordion>
+      }
+    </ion-accordion-group>
+
+    <h2>Roles</h2>
+    <ul>
+      <li><strong>Administrador:</strong> todo lo anterior, alta de productos y cuadro de mando.</li>
+      <li><strong>Usuario estándar:</strong> consulta, movimientos y exportación de informes.</li>
+    </ul>
+  </main>
 </ion-content>

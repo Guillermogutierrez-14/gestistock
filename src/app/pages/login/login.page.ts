@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardHeader, IonCardTitle,
   IonCardSubtitle, IonCardContent, IonInput, IonInputPasswordToggle, IonButton, IonSpinner, IonText,
@@ -26,6 +26,13 @@ export class LoginPage {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly parametros = inject(ActivatedRoute).snapshot.queryParamMap;
+
+  /** Página a la que volver tras iniciar sesión (solo rutas internas: evita open redirect) */
+  private readonly returnUrl = urlInternaSegura(this.parametros.get('returnUrl'));
+
+  /** true si llegamos aquí porque el interceptor cerró la sesión por token caducado */
+  readonly sesionExpirada = this.parametros.get('motivo') === 'sesion-expirada';
 
   /** Formulario reactivo con sus validaciones */
   readonly formulario = this.fb.nonNullable.group({
@@ -48,11 +55,16 @@ export class LoginPage {
     const { email, password } = this.formulario.getRawValue();
     try {
       await this.auth.login(email, password);
-      await this.router.navigateByUrl('/inicio', { replaceUrl: true });
+      await this.router.navigateByUrl(this.returnUrl, { replaceUrl: true });
     } catch (error) {
       this.mensajeError.set(error instanceof Error ? error.message : 'Error inesperado.');
     } finally {
       this.cargando.set(false);
     }
   }
+}
+
+/** Acepta solo rutas internas ('/algo'), nunca '//otro-dominio' ni URLs absolutas */
+function urlInternaSegura(url: string | null): string {
+  return url && url.startsWith('/') && !url.startsWith('//') ? url : '/inicio';
 }

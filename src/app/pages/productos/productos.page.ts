@@ -5,13 +5,15 @@ import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonMenuButton,
   IonSpinner, IonText, IonButton, IonIcon, ToastController,
 } from '@ionic/angular';
+import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { cubeOutline, warningOutline, cashOutline, documentTextOutline, downloadOutline } from 'ionicons/icons';
+import { cubeOutline, warningOutline, cashOutline, documentTextOutline, downloadOutline, addCircleOutline } from 'ionicons/icons';
 import { ProductoService } from '../../core/services/producto.service';
 import { ExportacionService } from '../../core/services/exportacion.service';
 import { Producto } from '../../core/models/producto.model';
 import { ColumnaTabla, TablaDatosComponent } from '../../shared/components/tabla-datos/tabla-datos.component';
 import { WidgetEstadisticaComponent } from '../../shared/components/widget-estadistica/widget-estadistica.component';
+import { TieneRolDirective } from '../../shared/directives/tiene-rol.directive';
 
 /**
  * Página de productos (componente PADRE).
@@ -25,6 +27,7 @@ import { WidgetEstadisticaComponent } from '../../shared/components/widget-estad
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonSpinner, IonText,
     IonButton, IonIcon, CurrencyPipe, TablaDatosComponent, WidgetEstadisticaComponent,
+    RouterLink, TieneRolDirective,
   ],
 })
 export class ProductosPage implements OnInit {
@@ -70,7 +73,7 @@ export class ProductosPage implements OnInit {
   );
 
   constructor() {
-    addIcons({ cubeOutline, warningOutline, cashOutline, documentTextOutline, downloadOutline });
+    addIcons({ cubeOutline, warningOutline, cashOutline, documentTextOutline, downloadOutline, addCircleOutline });
   }
 
   /** Ciclo de vida: al iniciar el componente, cargamos los datos */

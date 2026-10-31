@@ -26,4 +26,10 @@ describe('InicioPage', () => {
   it('saluda al usuario por su nombre', () => {
     expect(fixture.nativeElement.textContent).toContain('Hola, Administrador');
   });
+
+  it('muestra el aviso de acceso denegado cuando llega ?acceso=denegado', () => {
+    fixture.componentRef.setInput('acceso', 'denegado');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain('No tienes permisos');
+  });
 });

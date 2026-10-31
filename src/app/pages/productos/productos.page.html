@@ -6,6 +6,11 @@
     <ion-title>Productos</ion-title>
     <!-- Exportación de informes (lo que se ve en la tabla) -->
     <ion-buttons slot="end">
+      <!-- Solo existe en el DOM para el administrador (directiva estructural RBAC) -->
+      <ion-button *appTieneRol="'admin'" routerLink="/productos/nuevo">
+        <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
+        Nuevo producto
+      </ion-button>
       <ion-button (click)="exportarCSV()" [disabled]="cargando() || !!error()">
         <ion-icon slot="start" name="document-text-outline" aria-hidden="true"></ion-icon>
         Exportar CSV

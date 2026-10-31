@@ -11,14 +11,15 @@ import {
   logOutOutline, logOutSharp, swapHorizontalOutline, swapHorizontalSharp,
 } from 'ionicons/icons';
 import { AuthService } from './core/services/auth.service';
+import { Permiso } from './core/models/perfil.model';
 
 /** Opción del menú lateral */
 interface OpcionMenu {
   title: string;
   url: string;
   icon: string;
-  /** Si es true, solo la ve el administrador */
-  soloAdmin: boolean;
+  /** Permiso necesario para ver la opción (sin permiso = la ve cualquier usuario con sesión) */
+  permiso?: Permiso;
 }
 
 /**
@@ -40,17 +41,17 @@ export class AppComponent {
 
   /** Todas las opciones del menú */
   private readonly opciones: OpcionMenu[] = [
-    { title: 'Inicio', url: '/inicio', icon: 'home', soloAdmin: false },
-    { title: 'Productos', url: '/productos', icon: 'cube', soloAdmin: false },
-    { title: 'Movimientos', url: '/movimientos', icon: 'swap-horizontal', soloAdmin: false },
-    { title: 'Nuevo producto', url: '/productos/nuevo', icon: 'add-circle', soloAdmin: true },
-    { title: 'Cuadro de mando', url: '/dashboard', icon: 'stats-chart', soloAdmin: true },
-    { title: 'Ayuda', url: '/ayuda', icon: 'help-circle', soloAdmin: false },
+    { title: 'Inicio', url: '/inicio', icon: 'home' },
+    { title: 'Productos', url: '/productos', icon: 'cube', permiso: 'productos:leer' },
+    { title: 'Movimientos', url: '/movimientos', icon: 'swap-horizontal', permiso: 'movimientos:leer' },
+    { title: 'Nuevo producto', url: '/productos/nuevo', icon: 'add-circle', permiso: 'productos:crear' },
+    { title: 'Cuadro de mando', url: '/dashboard', icon: 'stats-chart', permiso: 'dashboard:ver' },
+    { title: 'Ayuda', url: '/ayuda', icon: 'help-circle' },
   ];
 
-  /** Opciones visibles: se recalculan solas cuando cambia el rol (Signal computed) */
+  /** Opciones visibles: se recalculan solas cuando cambian los permisos (Signal computed) */
   protected readonly paginasVisibles = computed(() =>
-    this.opciones.filter((opcion) => !opcion.soloAdmin || this.auth.esAdmin()),
+    this.opciones.filter((opcion) => !opcion.permiso || this.auth.tienePermiso(opcion.permiso)),
   );
 
   constructor() {

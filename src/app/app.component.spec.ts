@@ -5,12 +5,14 @@ import { provideRouter, Router, RouterLink } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { AuthService } from './core/services/auth.service';
+import { PERMISOS_POR_ROL, Permiso } from './core/models/perfil.model';
 
 /** AuthService falso: así el test no se conecta a Supabase */
 function crearAuthFalso(esAdmin: boolean) {
   return {
     estaAutenticado: signal(true),
     esAdmin: signal(esAdmin),
+    tienePermiso: (p: Permiso) => PERMISOS_POR_ROL[esAdmin ? 'admin' : 'usuario'].includes(p),
     perfil: signal({ id: '1', nombre: 'Prueba', email: 'prueba@test.com', rol: esAdmin ? 'admin' : 'usuario' }),
     logout: vi.fn(),
   };

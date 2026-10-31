@@ -1,17 +1,26 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AyudaPage } from './ayuda.page';
+import { AuthService } from '../../core/services/auth.service';
+
+async function crear(esAdmin: boolean): Promise<ComponentFixture<AyudaPage>> {
+  await TestBed.configureTestingModule({
+    imports: [AyudaPage],
+    providers: [{ provide: AuthService, useValue: { esAdmin: signal(esAdmin) } }],
+  }).compileComponents();
+  const fixture = TestBed.createComponent(AyudaPage);
+  fixture.detectChanges();
+  return fixture;
+}
 
 describe('AyudaPage', () => {
-  let component: AyudaPage;
-  let fixture: ComponentFixture<AyudaPage>;
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(AyudaPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  it('el administrador ve la ayuda de alta de productos', async () => {
+    const fixture = await crear(true);
+    expect(fixture.nativeElement.textContent).toContain('Dar de alta un producto');
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('el usuario estándar no ve las secciones de administrador', async () => {
+    const fixture = await crear(false);
+    expect(fixture.nativeElement.textContent).not.toContain('Cuadro de mando');
   });
 });

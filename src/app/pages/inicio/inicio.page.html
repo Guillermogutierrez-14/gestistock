@@ -9,6 +9,13 @@
 
 <ion-content class="ion-padding">
   <main>
+    @if (acceso() === 'denegado') {
+      <ion-card color="danger">
+        <ion-card-content>
+          <p role="alert">No tienes permisos para acceder a esa sección. Solo está disponible para administradores.</p>
+        </ion-card-content>
+      </ion-card>
+    }
     <ion-card>
       <ion-card-header>
         <ion-card-title><h1>¡Hola, {{ auth.perfil()?.nombre }}!</h1></ion-card-title>
