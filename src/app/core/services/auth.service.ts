@@ -2,14 +2,14 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import type { Session } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
-import { Perfil } from '../models/perfil.model';
+import { ClaimsToken, PERMISOS_POR_ROL, Perfil, Permiso, Rol } from '../models/perfil.model';
 
 /**
- * Servicio de autenticación (capa Modelo en MVVM).
+ * Servicio de autenticación y sesión (capa Modelo en MVVM).
  * - Inicia y cierra sesión con Supabase Auth, que devuelve un token JWT.
- * - Carga el rol del usuario desde la tabla `perfiles`.
- * - Expone el estado con Signals de solo lectura: solo este servicio puede
- *   modificarlo, por lo que el estado global es predecible.
+ * - Carga el rol de negocio desde la tabla `perfiles` (protegida con RLS).
+ * - Es la ÚNICA fuente de verdad: ningún componente toca el token.
+ * - Expone el estado con Signals de solo lectura (sesión, claims, rol, permisos).
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -22,14 +22,23 @@ export class AuthService {
 
   /** Estado público de solo lectura */
   readonly perfil = this.perfilActual.asReadonly();
+  readonly claims = computed<ClaimsToken | null>(() => {
+    const token = this.sesion()?.access_token;
+    return token ? decodificarPayload(token) : null;
+  });
+  readonly rol = computed<Rol | null>(() => this.perfilActual()?.rol ?? null);
+  readonly permisos = computed<readonly Permiso[]>(() => {
+    const rol = this.rol();
+    return rol ? PERMISOS_POR_ROL[rol] : [];
+  });
   readonly estaAutenticado = computed(() => this.sesion() !== null && this.perfilActual() !== null);
-  readonly esAdmin = computed(() => this.perfilActual()?.rol === 'admin');
+  readonly esAdmin = computed(() => this.rol() === 'admin');
 
   /** Promesa que se resuelve cuando se ha comprobado si había una sesión guardada */
   private readonly inicializado: Promise<void> = this.restaurarSesion();
 
   constructor() {
-    // Mantiene el token actualizado (Supabase lo renueva solo) y detecta cierres de sesión
+    // Supabase renueva el token antes de `exp` y avisa aquí; todo lo que depende de `sesion` se recalcula
     this.supabase.auth.onAuthStateChange((evento, sesion) => {
       this.sesion.set(sesion);
       if (evento === 'SIGNED_OUT') {
@@ -41,6 +50,17 @@ export class AuthService {
   /** Los Guards esperan a esto antes de decidir si dejan pasar */
   esperarInicializacion(): Promise<void> {
     return this.inicializado;
+  }
+
+  /** ¿El usuario tiene alguno de estos roles? */
+  tieneRol(...roles: Rol[]): boolean {
+    const rol = this.rol();
+    return rol !== null && roles.includes(rol);
+  }
+
+  /** ¿El rol del usuario incluye este permiso? */
+  tienePermiso(permiso: Permiso): boolean {
+    return this.permisos().includes(permiso);
   }
 
   /** Inicia sesión con email y contraseña. Lanza un error si falla. */
@@ -67,6 +87,25 @@ export class AuthService {
   /** Token JWT del usuario actual (lo usa el interceptor HTTP) */
   getToken(): string | null {
     return this.sesion()?.access_token ?? null;
+  }
+
+  /** Renueva el access token con el refresh token. Devuelve true si lo consigue. */
+  async refrescarSesion(): Promise<boolean> {
+    const { data, error } = await this.supabase.auth.refreshSession();
+    if (error || !data.session) {
+      return false;
+    }
+    this.sesion.set(data.session);
+    return true;
+  }
+
+  /** Sesión caducada sin remedio: limpia y vuelve al login recordando la página actual */
+  async expirarSesion(urlActual: string): Promise<void> {
+    await this.limpiarSesion();
+    await this.router.navigate(['/login'], {
+      queryParams: { returnUrl: urlActual, motivo: 'sesion-expirada' },
+      replaceUrl: true,
+    });
   }
 
   /** Al abrir la app, recupera la sesión guardada en el navegador (si la hay) */
@@ -99,5 +138,15 @@ export class AuthService {
     await this.supabase.auth.signOut();
     this.sesion.set(null);
     this.perfilActual.set(null);
+  }
+}
+
+/** Lee (sin verificar) el payload del JWT. Solo para la interfaz: la firma la valida Supabase. */
+function decodificarPayload(token: string): ClaimsToken | null {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64)) as ClaimsToken;
+  } catch {
+    return null;
   }
 }

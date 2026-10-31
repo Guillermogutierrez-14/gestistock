@@ -11,6 +11,7 @@ import {
 import { ProductoService } from '../../core/services/producto.service';
 import { NuevoProducto } from '../../core/models/producto.model';
 import { codigoUnicoValidator } from '../../core/validators/codigo-unico.validator';
+import { ConCambiosSinGuardar } from '../../core/guards/cambios-sin-guardar.guard';
 
 /** Campos del formulario (para los mensajes de error) */
 type Campo = 'codigo' | 'nombre' | 'categoria' | 'precio' | 'stock' | 'stock_minimo';
@@ -31,7 +32,7 @@ type Campo = 'codigo' | 'nombre' | 'categoria' | 'precio' | 'stock' | 'stock_min
     IonToggle, IonCard, IonCardContent,
   ],
 })
-export class NuevoProductoPage {
+export class NuevoProductoPage implements ConCambiosSinGuardar {
   private readonly fb = inject(FormBuilder);
   private readonly productoService = inject(ProductoService);
   private readonly toastCtrl = inject(ToastController);
@@ -84,6 +85,11 @@ export class NuevoProductoPage {
     return 'Valor no válido.';
   }
 
+  /** true si se ha escrito algo y no se ha guardado (lo consulta cambiosSinGuardarGuard) */
+  tieneCambiosSinGuardar(): boolean {
+    return this.formulario.dirty && !this.guardando();
+  }
+
   /** true mientras se está ejecutando la validación asíncrona del código */
   get comprobandoCodigo(): boolean {
     return this.formulario.controls.codigo.pending;
@@ -123,6 +129,7 @@ export class NuevoProductoPage {
           color: 'success',
         });
         await toast.present();
+        this.formulario.markAsPristine(); // ya guardado: no pedir confirmación al salir
         if (this.seguirAnadiendo) {
           this.formulario.reset();
         } else {

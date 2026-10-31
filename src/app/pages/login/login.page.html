@@ -14,6 +14,11 @@
 
       <ion-card-content>
         <!-- formGroup enlaza el formulario HTML con el FormGroup del .ts -->
+        @if (sesionExpirada) {
+          <ion-text color="warning">
+            <p role="status">Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.</p>
+          </ion-text>
+        }
         <form [formGroup]="formulario" (ngSubmit)="iniciarSesion()" novalidate>
           <ion-input
             formControlName="email"
